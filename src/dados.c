@@ -3,50 +3,44 @@
 
 #define PI 3.14159265f
 
-/* ------------------------------------------------------------------
-   PARADAS (baseadas no itinerario do transporte estudantil da UNIVASF)
-   ATENCAO: latitude/longitude APROXIMADAS. Conferir cada uma no
-   Google Maps (clique direito na parada -> copiar coordenadas) e
-   substituir aqui. O resto do codigo nao precisa mudar.
-   ------------------------------------------------------------------ */
 static const float lat[NUM_PARADAS] = {
-    -9.4165f,  // 0  Univasf Campus Juazeiro
-    -9.4105f,  // 1  Terminal de Juazeiro (Camelodromo)
-    -9.3890f,  // 2  Univasf Campus Petrolina
-    -9.3780f,  // 3  Sementeira (Av. da Integracao)
-    -9.3700f,  // 4  Petrape (Av. da Integracao)
-    -9.3640f,  // 5  Plante Bem
-    -9.3480f,  // 6  Feira da Cohab Massangano
-    -9.3380f,  // 7  BR 407 - Izabela Construcoes
-    -9.3270f,  // 8  Residencia Estudantil CCA
-    -9.3250f,  // 9  CCA - Bloco Antigo
-    -9.3260f,  // 10 CCA - Hospital Veterinario
-    -9.3240f,  // 11 CCA - Bloco de Salas de Aula
-    -9.3960f,  // 12 G Barbosa Petrolina
-    -9.3850f,  // 13 Canteiro de Obras (Av. 7 de Setembro)
-    -9.3700f,  // 14 Posto Sao Francisco (Av. 7 de Setembro)
-    -9.3930f,  // 15 Supermercado Regente
-    -9.3500f   // 16 Nutiva Agro (Av. Transnordestina)
+    -9.412673720400798f,  // 0  Univasf Campus Juazeiro
+    -9.415332785322489f,  // 1  Terminal de Juazeiro (Camelodromo)
+    -9.389648859169695f,  // 2  Univasf Campus Petrolina
+    -9.385122380591573f,  // 3  Sementeira (Av. da Integracao)
+    -9.388416628732136f,  // 4  Petrape (Av. da Integracao)
+    -9.364035281397888f,  // 5  Plante Bem
+    -9.385445500386941f,  // 6  Feira da Cohab Massangano
+    -9.362148658175421f,  // 7  BR 407 - Izabela Construcoes
+    -9.32180f,  // 8  Residencia Estudantil CCA
+    -9.32389f,  // 9  CCA - Bloco Antigo
+    -9.33066f,  // 10 CCA - Hospital Veterinario
+    -9.32480f,  // 11 CCA - Bloco de Salas de Aula
+    -9.389972017833120f,  // 12 G Barbosa Petrolina
+    -9.376072582074487f,  // 13 Canteiro de Obras (Av. 7 de Setembro)
+    -9.385654241724195f,  // 14 Posto Sao Francisco (Av. 7 de Setembro)
+    -9.389333057631240f,  // 15 Supermercado Regente
+    -9.370991740943255f,   // 16 Nutiva Agro (Av. Transnordestina)
 };
 
 static const float lon[NUM_PARADAS] = {
-    -40.4985f, // 0
-    -40.5040f, // 1
-    -40.5130f, // 2
-    -40.5340f, // 3
-    -40.5520f, // 4
-    -40.5800f, // 5
-    -40.6150f, // 6
-    -40.6450f, // 7
-    -40.6650f, // 8
-    -40.6680f, // 9
-    -40.6700f, // 10
-    -40.6710f, // 11
-    -40.5250f, // 12
-    -40.5650f, // 13
-    -40.5950f, // 14
-    -40.5040f, // 15
-    -40.6350f  // 16
+    -40.51522711743834f, // 0
+    -40.50514898221689f, // 1
+    -40.49561316103118f, // 2
+    -40.50941085520911f, // 3
+    -40.51786635918067f, // 4
+    -40.48219946677314f, // 5
+    -40.52883266641953f, // 6
+    -40.54585034568906f, // 7
+    -40.56120f, // 8
+    -40.56000f, // 9
+    -40.55775f, // 10
+    -40.55930f, // 11
+    -40.48873296617766f, // 12
+    -40.49517754859295f, // 13
+    -40.52307216490445f, // 14
+    -40.50900102888163f, // 15
+    -40.53387533503611f,  // 16
 };
 
 float coord_x[NUM_PARADAS];
