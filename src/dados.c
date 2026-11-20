@@ -12,40 +12,40 @@ static const float lat[NUM_PARADAS] = {
     -9.364035281397888f,  // 5  Plante Bem
     -9.385445500386941f,  // 6  Feira da Cohab Massangano
     -9.362148658175421f,  // 7  BR 407 - Izabela Construcoes
-    -9.32180f,  // 8  Residencia Estudantil CCA
-    -9.32389f,  // 9  CCA - Bloco Antigo
-    -9.33066f,  // 10 CCA - Hospital Veterinario
-    -9.32480f,  // 11 CCA - Bloco de Salas de Aula
+    -9.32180f,            // 8  Residencia Estudantil CCA
+    -9.32389f,            // 9  CCA - Bloco Antigo
+    -9.33066f,            // 10 CCA - Hospital Veterinario
+    -9.32480f,            // 11 CCA - Bloco de Salas de Aula
     -9.389972017833120f,  // 12 G Barbosa Petrolina
     -9.376072582074487f,  // 13 Canteiro de Obras (Av. 7 de Setembro)
     -9.385654241724195f,  // 14 Posto Sao Francisco (Av. 7 de Setembro)
     -9.389333057631240f,  // 15 Supermercado Regente
-    -9.370991740943255f,   // 16 Nutiva Agro (Av. Transnordestina)
+    -9.370991740943255f   // 16 Nutiva Agro (Av. Transnordestina)
 };
 
 static const float lon[NUM_PARADAS] = {
-    -40.51522711743834f, // 0
-    -40.50514898221689f, // 1
-    -40.49561316103118f, // 2
-    -40.50941085520911f, // 3
-    -40.51786635918067f, // 4
-    -40.48219946677314f, // 5
-    -40.52883266641953f, // 6
-    -40.54585034568906f, // 7
-    -40.56120f, // 8
-    -40.56000f, // 9
-    -40.55775f, // 10
-    -40.55930f, // 11
-    -40.48873296617766f, // 12
-    -40.49517754859295f, // 13
-    -40.52307216490445f, // 14
-    -40.50900102888163f, // 15
-    -40.53387533503611f,  // 16
+    -40.51522711743834f,  // 0
+    -40.50514898221689f,  // 1
+    -40.49561316103118f,  // 2
+    -40.50941085520911f,  // 3
+    -40.51786635918067f,  // 4
+    -40.48219946677314f,  // 5
+    -40.52883266641953f,  // 6
+    -40.54585034568906f,  // 7
+    -40.56120f,           // 8
+    -40.56000f,           // 9
+    -40.55775f,           // 10
+    -40.55930f,           // 11
+    -40.48873296617766f,  // 12
+    -40.49517754859295f,  // 13
+    -40.52307216490445f,  // 14
+    -40.50900102888163f,  // 15
+    -40.53387533503611f   // 16
 };
 
 float coord_x[NUM_PARADAS];
 float coord_y[NUM_PARADAS];
-float velocidade_media = 0.5f;   // sera recalculada em carregar_malha()
+float velocidade_media = 0.963f; // recalculada dinamicamente em carregar_malha()
 
 const char* nome_parada[NUM_PARADAS] = {
     "Univasf Campus Juazeiro",          // 0
@@ -71,6 +71,8 @@ const char* nome_linha[5] = {
     "-", "Onibus A", "Onibus B", "Onibus C", "Onibus D"
 };
 
+static int coordenadas_convertidas = 0;
+
 /* Converte lat/long (graus) para X, Y em km, tendo a parada 0 como origem */
 static void converter_coordenadas(void) {
     float lat0 = lat[0] * PI / 180.0f;
@@ -78,9 +80,10 @@ static void converter_coordenadas(void) {
         coord_x[i] = (lon[i] - lon[0]) * 111.32f * cosf(lat0);
         coord_y[i] = (lat[i] - lat[0]) * 110.57f;
     }
+    coordenadas_convertidas = 1;
 }
 
-static float vel_max;   // maior velocidade (km/min) entre todas as arestas
+static float vel_max; // maior velocidade (km/min) entre todas as arestas
 
 /* Insere o trecho nos dois sentidos e atualiza a maior velocidade do mapa */
 static void trecho(GRAFO* g, int a, int b, float tempo, int linha) {
@@ -101,7 +104,7 @@ void carregar_malha(GRAFO* g) {
     trecho(g, 1, 2, 5.0f, LINHA_A);
     trecho(g, 2, 15, 5.0f, LINHA_A);
     trecho(g, 15, 6, 8.0f, LINHA_A);
-    trecho(g, 6, 7, 2.0f, LINHA_A);
+    trecho(g, 6, 7, 5.0f, LINHA_A);
     trecho(g, 7, 10, 5.0f, LINHA_A);
 
     // Onibus B: Juazeiro -> Petrolina -> Av. da Integracao -> Cohab -> CCA
@@ -109,7 +112,7 @@ void carregar_malha(GRAFO* g) {
     trecho(g, 1, 2, 5.0f, LINHA_B);
     trecho(g, 2, 3, 8.0f, LINHA_B);
     trecho(g, 3, 4, 2.0f, LINHA_B);
-    trecho(g, 4, 5, 2.0f, LINHA_B);
+    trecho(g, 4, 5, 9.0f, LINHA_B);
     trecho(g, 5, 6, 18.0f, LINHA_B);
     trecho(g, 6, 7, 5.0f, LINHA_B);
     trecho(g, 7, 8, 5.0f, LINHA_B);
@@ -143,5 +146,7 @@ void carregar_malha(GRAFO* g) {
 
     /* Velocidade usada na heuristica = maior velocidade do mapa (+1% de folga
        para erro de arredondamento). Assim h(n) nunca superestima o tempo real. */
-    velocidade_media = vel_max * 1.01f;
+    if (vel_max > 0.0f) {
+        velocidade_media = vel_max * 1.01f;
+    }
 }
