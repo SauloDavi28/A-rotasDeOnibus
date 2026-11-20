@@ -1,44 +1,153 @@
+#include <math.h>
 #include "dados.h"
 
-// Coordenadas em km (mapa ficticio)
-float coord_x[NUM_PARADAS] = {0, 1, 3, 5, 6, 8, 9, 5, 8, 3};
-float coord_y[NUM_PARADAS] = {0, 1, 1, 1, 3, 3, 5, 4, 6, 4};
+#define PI 3.14159265f
 
-const char* nome_parada[NUM_PARADAS] = {
-    "Terminal Petrolina",   // 0
-    "Orla Petrolina",       // 1
-    "Ponte",                // 2
-    "Terminal Juazeiro",    // 3
-    "Centro Juazeiro",      // 4
-    "Hospital",             // 5
-    "Campus Univasf",       // 6
-    "Rodoviaria",           // 7
-    "Portaria Univasf",     // 8
-    "Bairro Tabuleiro"      // 9
+/* ------------------------------------------------------------------
+   PARADAS (baseadas no itinerario do transporte estudantil da UNIVASF)
+   ATENCAO: latitude/longitude APROXIMADAS. Conferir cada uma no
+   Google Maps (clique direito na parada -> copiar coordenadas) e
+   substituir aqui. O resto do codigo nao precisa mudar.
+   ------------------------------------------------------------------ */
+static const float lat[NUM_PARADAS] = {
+    -9.4165f,  // 0  Univasf Campus Juazeiro
+    -9.4105f,  // 1  Terminal de Juazeiro (Camelodromo)
+    -9.3890f,  // 2  Univasf Campus Petrolina
+    -9.3780f,  // 3  Sementeira (Av. da Integracao)
+    -9.3700f,  // 4  Petrape (Av. da Integracao)
+    -9.3640f,  // 5  Plante Bem
+    -9.3480f,  // 6  Feira da Cohab Massangano
+    -9.3380f,  // 7  BR 407 - Izabela Construcoes
+    -9.3270f,  // 8  Residencia Estudantil CCA
+    -9.3250f,  // 9  CCA - Bloco Antigo
+    -9.3260f,  // 10 CCA - Hospital Veterinario
+    -9.3240f,  // 11 CCA - Bloco de Salas de Aula
+    -9.3960f,  // 12 G Barbosa Petrolina
+    -9.3850f,  // 13 Canteiro de Obras (Av. 7 de Setembro)
+    -9.3700f,  // 14 Posto Sao Francisco (Av. 7 de Setembro)
+    -9.3930f,  // 15 Supermercado Regente
+    -9.3500f   // 16 Nutiva Agro (Av. Transnordestina)
 };
 
-// Insere o trecho nos dois sentidos (o onibus vai e volta)
+static const float lon[NUM_PARADAS] = {
+    -40.4985f, // 0
+    -40.5040f, // 1
+    -40.5130f, // 2
+    -40.5340f, // 3
+    -40.5520f, // 4
+    -40.5800f, // 5
+    -40.6150f, // 6
+    -40.6450f, // 7
+    -40.6650f, // 8
+    -40.6680f, // 9
+    -40.6700f, // 10
+    -40.6710f, // 11
+    -40.5250f, // 12
+    -40.5650f, // 13
+    -40.5950f, // 14
+    -40.5040f, // 15
+    -40.6350f  // 16
+};
+
+float coord_x[NUM_PARADAS];
+float coord_y[NUM_PARADAS];
+float velocidade_media = 0.5f;   // sera recalculada em carregar_malha()
+
+const char* nome_parada[NUM_PARADAS] = {
+    "Univasf Campus Juazeiro",          // 0
+    "Terminal de Juazeiro",             // 1
+    "Univasf Campus Petrolina",         // 2
+    "Sementeira",                       // 3
+    "Petrape",                          // 4
+    "Plante Bem",                       // 5
+    "Feira da Cohab Massangano",        // 6
+    "BR 407 - Izabela Construcoes",     // 7
+    "Residencia Estudantil CCA",        // 8
+    "CCA - Bloco Antigo",               // 9
+    "CCA - Hospital Veterinario",       // 10
+    "CCA - Bloco de Salas de Aula",     // 11
+    "G Barbosa Petrolina",              // 12
+    "Canteiro de Obras (Av. 7 Set.)",   // 13
+    "Posto Sao Francisco (Av. 7 Set.)", // 14
+    "Supermercado Regente",             // 15
+    "Nutiva Agro (Transnordestina)"     // 16
+};
+
+const char* nome_linha[5] = {
+    "-", "Onibus A", "Onibus B", "Onibus C", "Onibus D"
+};
+
+/* Converte lat/long (graus) para X, Y em km, tendo a parada 0 como origem */
+static void converter_coordenadas(void) {
+    float lat0 = lat[0] * PI / 180.0f;
+    for (int i = 0; i < NUM_PARADAS; i++) {
+        coord_x[i] = (lon[i] - lon[0]) * 111.32f * cosf(lat0);
+        coord_y[i] = (lat[i] - lat[0]) * 110.57f;
+    }
+}
+
+static float vel_max;   // maior velocidade (km/min) entre todas as arestas
+
+/* Insere o trecho nos dois sentidos e atualiza a maior velocidade do mapa */
 static void trecho(GRAFO* g, int a, int b, float tempo, int linha) {
     inserir_aresta(g, a, b, tempo, linha);
     inserir_aresta(g, b, a, tempo, linha);
+
+    float dx = coord_x[b] - coord_x[a];
+    float dy = coord_y[b] - coord_y[a];
+    float v = sqrtf(dx * dx + dy * dy) / tempo;
+    if (v > vel_max) vel_max = v;
 }
 
 void carregar_malha(GRAFO* g) {
-    // Linha 101: Terminal Petrolina -> Campus Univasf (pela ponte)
-    trecho(g, 0, 1, 4.0, 101);
-    trecho(g, 1, 2, 5.0, 101);
-    trecho(g, 2, 3, 5.0, 101);
-    trecho(g, 3, 4, 6.0, 101);
-    trecho(g, 4, 5, 5.0, 101);
-    trecho(g, 5, 6, 6.0, 101);
+    converter_coordenadas();
+    vel_max = 0.0f;
 
-    // Linha 202: Terminal Juazeiro -> Rodoviaria -> Portaria -> Campus
-    trecho(g, 3, 7, 7.0, 202);
-    trecho(g, 7, 8, 8.0, 202);
-    trecho(g, 8, 6, 4.0, 202);
+    // Onibus A: Terminal -> Petrolina -> Regente -> Cohab -> BR 407 -> CCA
+    trecho(g, 1, 2, 5.0f, LINHA_A);
+    trecho(g, 2, 15, 5.0f, LINHA_A);
+    trecho(g, 15, 6, 8.0f, LINHA_A);
+    trecho(g, 6, 7, 2.0f, LINHA_A);
+    trecho(g, 7, 10, 5.0f, LINHA_A);
 
-    // Linha 303: Orla -> Tabuleiro -> Rodoviaria -> Centro Juazeiro
-    trecho(g, 1, 9, 8.0, 303);
-    trecho(g, 9, 7, 5.0, 303);
-    trecho(g, 7, 4, 4.0, 303);
+    // Onibus B: Juazeiro -> Petrolina -> Av. da Integracao -> Cohab -> CCA
+    trecho(g, 0, 1, 5.0f, LINHA_B);
+    trecho(g, 1, 2, 5.0f, LINHA_B);
+    trecho(g, 2, 3, 8.0f, LINHA_B);
+    trecho(g, 3, 4, 2.0f, LINHA_B);
+    trecho(g, 4, 5, 2.0f, LINHA_B);
+    trecho(g, 5, 6, 18.0f, LINHA_B);
+    trecho(g, 6, 7, 5.0f, LINHA_B);
+    trecho(g, 7, 8, 5.0f, LINHA_B);
+    trecho(g, 8, 9, 2.0f, LINHA_B);
+    trecho(g, 9, 10, 3.0f, LINHA_B);
+    trecho(g, 10, 11, 3.0f, LINHA_B);
+
+    // Onibus C: Juazeiro -> Av. Transnordestina -> CCA (volta por Petrolina)
+    trecho(g, 0, 1, 5.0f, LINHA_C);
+    trecho(g, 1, 16, 40.0f, LINHA_C);
+    trecho(g, 16, 7, 5.0f, LINHA_C);
+    trecho(g, 7, 10, 5.0f, LINHA_C);
+    trecho(g, 10, 11, 3.0f, LINHA_C);
+    trecho(g, 6, 12, 18.0f, LINHA_C);
+    trecho(g, 12, 2, 7.0f, LINHA_C);
+    trecho(g, 2, 15, 3.0f, LINHA_C);
+
+    // Onibus D: Juazeiro -> Petrolina -> Av. 7 de Setembro -> Cohab -> CCA
+    trecho(g, 0, 1, 5.0f, LINHA_D);
+    trecho(g, 1, 3, 5.0f, LINHA_D);
+    trecho(g, 3, 2, 5.0f, LINHA_D);
+    trecho(g, 2, 12, 8.0f, LINHA_D);
+    trecho(g, 12, 13, 7.0f, LINHA_D);
+    trecho(g, 13, 14, 5.0f, LINHA_D);
+    trecho(g, 14, 6, 5.0f, LINHA_D);
+    trecho(g, 6, 7, 5.0f, LINHA_D);
+    trecho(g, 7, 8, 5.0f, LINHA_D);
+    trecho(g, 8, 9, 5.0f, LINHA_D);
+    trecho(g, 9, 10, 3.0f, LINHA_D);
+    trecho(g, 10, 11, 2.0f, LINHA_D);
+
+    /* Velocidade usada na heuristica = maior velocidade do mapa (+1% de folga
+       para erro de arredondamento). Assim h(n) nunca superestima o tempo real. */
+    velocidade_media = vel_max * 1.01f;
 }
