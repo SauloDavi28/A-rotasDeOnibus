@@ -11,6 +11,9 @@
 #define LINHA_C 3
 #define LINHA_D 4
 
+// Quantidade de valores possiveis de linha: 0 (sem linha, na origem) + 4 linhas
+#define NUM_LINHAS 5
+
 extern float coord_x[NUM_PARADAS];          // km (convertido de lat/long)
 extern float coord_y[NUM_PARADAS];          // km (convertido de lat/long)
 extern const char* nome_parada[NUM_PARADAS];
