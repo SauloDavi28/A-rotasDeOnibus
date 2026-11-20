@@ -18,5 +18,6 @@ extern const char* nome_linha[5];           // indexado pelo id_linha (1 a 4)
 extern float velocidade_media;              // km/min, calculada em carregar_malha()
 
 void carregar_malha(GRAFO* g);
+float calcular_h(int parada_atual, int parada_destino);
 
 #endif
