@@ -5,6 +5,16 @@
 
 float calcular_h(int parada_atual, int parada_destino);
 
-// A Pessoa 4 vai adicionar o prototipo de busca_A_estrela() aqui embaixo
+int busca_A_estrela(
+    GRAFO *g,
+    int origem,
+    int destino,
+    int pai[],
+    int linha_usada[],
+    float *tempo_total
+);
+
+
+
 
 #endif
