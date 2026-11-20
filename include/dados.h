@@ -3,11 +3,19 @@
 
 #include "grafo.h"
 
-#define NUM_PARADAS 10
+#define NUM_PARADAS 17
 
-extern float coord_x[NUM_PARADAS];
-extern float coord_y[NUM_PARADAS];
+// id_linha das arestas (ficam sempre diferentes de 0)
+#define LINHA_A 1
+#define LINHA_B 2
+#define LINHA_C 3
+#define LINHA_D 4
+
+extern float coord_x[NUM_PARADAS];          // km (convertido de lat/long)
+extern float coord_y[NUM_PARADAS];          // km (convertido de lat/long)
 extern const char* nome_parada[NUM_PARADAS];
+extern const char* nome_linha[5];           // indexado pelo id_linha (1 a 4)
+extern float velocidade_media;              // km/min, calculada em carregar_malha()
 
 void carregar_malha(GRAFO* g);
 
